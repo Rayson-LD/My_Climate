@@ -1,70 +1,62 @@
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:weather_icons/weather_icons.dart';
 class GetIcons{
   // ignore: missing_return
   static Icon getIcon(String iconCode){
     if(iconCode == '01d'){
-      return Icon(MdiIcons.weatherSunny,size: 25,
-        color: Colors.amber,);
+      return Icon(WeatherIcons.day_sunny,color: Colors.yellow,);
     }else if(iconCode == '01n'){
-      return Icon(MdiIcons.moonFull,size: 25,);
+      return Icon(WeatherIcons.moon_full);
     }
 
     else if(iconCode == '02d'){
-      return Icon(MdiIcons.weatherPartlyCloudy,size: 25,
-        color: Colors.amber,);
+      return Icon(WeatherIcons.day_cloudy,color: Colors.black,);
     }
 
     else if(iconCode == '02n'){
-      return Icon(MdiIcons.weatherNightPartlyCloudy,color:Colors.grey,size: 25,);
+      return Icon(WeatherIcons.night_cloudy,color: Colors.lightBlueAccent,);
     }
 
     else if(iconCode == '03d' || iconCode == '03n'){
-      return Icon(MdiIcons.weatherCloudy,color: Colors.blue,size: 25,);
+      return Icon(WeatherIcons.cloudy_gusts,color: Colors.lightBlueAccent,);
     }
 
     //broken clouds
     else if(iconCode == '04d' || iconCode == '04n') {
-      return Icon(MdiIcons.weatherPartlyRainy,size: 25,
-        color: Colors.blue,);
+      return Icon(WeatherIcons.cloudy,color: Colors.lightBlueAccent,);
     }
 
 
     //shower rain
     else if(iconCode == '09d' || iconCode == '09n') {
-      return Icon(MdiIcons.weatherPartlySnowyRainy,size: 25,
-        color: Colors.blue,);
+      return Icon(WeatherIcons.raindrops,color: Colors.lightBlueAccent,);
     }
 
 
     //rain
     else if(iconCode == '10d' || iconCode == '10n') {
-      return Icon(MdiIcons.weatherRainy,size: 25,
-        color: Colors.blue,);
+      return Icon(WeatherIcons.rain,color: Colors.lightBlueAccent,);
     }
 
 
 
     //thunderstorm
     else if(iconCode == '11d' || iconCode == '11n') {
-      return Icon(MdiIcons.weatherLightning,size: 25,
-        color: Colors.yellow,);
+      return Icon(WeatherIcons.thunderstorm);
     }
 
 
 
     //snow
     else if(iconCode == '13d' || iconCode == '13n') {
-      return Icon(MdiIcons.weatherSnowy,size: 25,
-        color: Colors.yellow,);
+      return Icon(WeatherIcons.snow);
     }
 
 
 
     //mist
     else if(iconCode == '50d' || iconCode == '50n') {
-      return Icon(MdiIcons.weatherFog,size: 25,
-        color: Colors.blue,);
+      return Icon(WeatherIcons.wind);
     }
 
   }
