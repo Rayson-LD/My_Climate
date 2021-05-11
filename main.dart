@@ -1,20 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'GetIcons.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'Getlocation.dart';
+import 'package:weather_icons/weather_icons.dart';
 class Main extends StatefulWidget {
   @override
   _MainState createState() => _MainState();
 }
-class _MainState extends State<Main> {
+class _MainState extends State<Main> with SingleTickerProviderStateMixin {
+  TabController tabs;
   // ignore: non_constant_identifier_names
-  var humidity,speed,pressure,country,icon,temp,description,feels_like,temp_min,temp_max,city,image;
+  var humidity,speed,pressure,country,icon,temp,description,feels_like,temp_min,temp_max,city,image,location,id;
   var day = DateFormat.E().format(DateTime.now());
   var currentTime = DateFormat.jm().format(DateTime.now());
-  static const String _apiKey = 'ea429197b38be89cb9a58407faa003b0';
+  static const String _apiKey = 'Your API Key';
+  String searchApiUrl = 'https://www.metaweather.com/api/location/search/?query=';
+  String locationAppUrl = 'https://www.metaweather.com/api/location/';
+  int woeid;
+  void fetchSearch(String input) async{
+    var searchResult = await http.get(searchApiUrl+input);
+    var result = json.decode(searchResult.body)[0];
+    setState(() {
+      this.location = result["title"];
+      this.id = result["woeid"];
+    });
+  }
+  void fetchLocation() async{
+    var locationResult = await http.get(locationAppUrl+ woeid.toString());
+    var get = json.decode(locationResult.body);
+    var weather = get["consolidated_weather"];
+    var data  = weather[0];
+    setState(() {
+      this.country = data['title'];
+      this.temp = data['the_temp'].round();
+      this.description = data['weather_state_name'].replaceAll(' ','').toLowerCase();
+    });
+  }
+  void onSubmit(String input)
+  {
+    fetchSearch(input);
+    fetchLocation();
+  }
   Future getTemp() async {
     var lalo = await Getlocation.getCurrentLocation();
     if (lalo != null) {
@@ -46,11 +75,29 @@ class _MainState extends State<Main> {
   {
     super.initState();
     this.getTemp();
+    tabs = new TabController(length: 3, vsync: this);
   }
+
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home : new Scaffold(
+          bottomNavigationBar: new Material(
+
+              color: Colors.black,
+              child: new TabBar(controller: tabs, tabs: <Widget>[
+                new Tab(
+                  icon: new Icon(MdiIcons.information),
+
+                ),
+
+                new Tab(
+                  icon: new Icon(WeatherIcons.thermometer_exterior),
+                ),
+                new Tab(
+                  icon: new Icon(WeatherIcons.barometer),
+                )
+              ])),
           body : Container(
             decoration: BoxDecoration(
               image: DecorationImage(
@@ -58,9 +105,22 @@ class _MainState extends State<Main> {
                 fit: BoxFit.cover,
               )
             ),
-      child:  Column(
+      child:  TabBarView(
+        controller : tabs,
+      children : [
+      Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          Container(
+            width: 300,
+            child: TextField(onSubmitted: (String input){onSubmit(input);},
+              style: TextStyle(color: Colors.white,fontSize: 25),
+            decoration: InputDecoration(hintText: 'Search another location ...',
+            hintStyle: TextStyle(color: Colors.white,fontSize: 18),
+                prefixIcon: Icon(Icons.search,color: Colors.white,)
+            ),
+            ),
+          ),
           Container(
             margin: EdgeInsets.only(top: 30),
             child : new Text('$day, $currentTime',style: TextStyle(color: Colors.white,fontSize: 25),),
@@ -91,43 +151,79 @@ class _MainState extends State<Main> {
          ],
           ),
           ),
-          Card(
-            color: Colors.white,
-            margin: EdgeInsets.symmetric(vertical: 17.0, horizontal:17.0),
+          ],
+      ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  height : 150,
+                width : 350,
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
+                child : Card(
+            color: Colors.transparent,
             child: ListTile(
               leading: GetIcons.getIcon(icon),
               title: Text(
-                'Temperature: ${temp != null ? temp.toString()+'\u00b0':'Loading ..'} C',
+                'Temperature: ${temp != null ? temp.toString()+'\u00b0':'Loading ..'} C',style: TextStyle(fontSize: 28,color: Colors.white),
               ),
-              subtitle: Text('Status: ${description != null ? description.toString():'Loading ..'}'),
+              subtitle: Text('Status: ${description != null ? description.toString():'Loading ..'}',style: TextStyle(fontSize: 20,color: Colors.white),),
             ),
           ),
-          Card(
-            color: Colors.white,
-            margin: EdgeInsets.symmetric(vertical: 17.0, horizontal:17.0),
-            child: ListTile(
-              leading: GetIcons.getIcon(icon),
-              title: Text(
-                'Pressure: ${pressure != null ? pressure.toString():'Loading ..'} Pa',
-              ),
-              subtitle: Text('Humidity: ${humidity != null ? humidity.toString():'Loading ..'} %'),
-            ),
-          ),
-          Card(
-            color: Colors.white,
-            margin: EdgeInsets.symmetric(vertical: 17.0, horizontal:17.0),
-            child: ListTile(
-              leading: GetIcons.getIcon(icon),
-              title: Text(
-                'Min Temp:  ${temp_min != null ? temp_min.toString()+'\u00b0':'Loading ..'} C',
-              ),
-              subtitle: Text('Max Temp:  ${temp_max != null ? temp_max.toString()+'\u00b0':'Loading ..'} C'),
-            ),
-          ),
+                ),
           Container(
-            margin: EdgeInsets.only(top: 20),
-            child : new Text('Wind Speed : ${speed != null ? speed.toString()  : "Loading..." } mps',style: TextStyle(color: Colors.white),),
+            height : 150,
+            width : 350,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
+         child : Card(
+            color: Colors.transparent,
+
+            child: ListTile(
+              leading: GetIcons.getIcon(icon),
+              title: Text(
+                'Pressure: ${pressure != null ? pressure.toString():'Loading ..'} Pa',style: TextStyle(fontSize: 28,color: Colors.white),
+              ),
+              subtitle: Text('Humidity: ${humidity != null ? humidity.toString():'Loading ..'} %',style: TextStyle(fontSize: 20,color: Colors.white),),
+            ),
           ),
+          ),
+          ],
+          ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  height : 150,
+                  width : 350,
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
+         child : Card(
+            color: Colors.transparent,
+            child: ListTile(
+              leading: GetIcons.getIcon(icon),
+              title: Text(
+                'Min Temp:  ${temp_min != null ? temp_min.toString()+'\u00b0':'Loading ..'} C',style: TextStyle(fontSize: 28,color: Colors.white),
+              ),
+              subtitle: Text('Max Temp:  ${temp_max != null ? temp_max.toString()+'\u00b0':'Loading ..'} C',style: TextStyle(fontSize: 20,color: Colors.white),),
+            ),
+          ),
+                ),
+          Container(
+            height : 150,
+            width : 350,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
+            child : Card(
+              color: Colors.transparent,
+              child: ListTile(
+                leading: GetIcons.getIcon(icon),
+                title: Text(
+                  'Speed :  ${speed != null ? speed.toString()+'\u00b0':'Loading ..'} C',style: TextStyle(fontSize: 28,color: Colors.white),
+                ),
+                subtitle: Text('Max Temp:  ${temp_max != null ? temp_max.toString()+'\u00b0':'Loading ..'} C',style: TextStyle(fontSize: 20,color: Colors.white),),
+              ),
+            ),
+          ),
+        ],
+      ),
         ],
       ),
     )
@@ -135,17 +231,7 @@ class _MainState extends State<Main> {
     );
   }
 }
-class Getlocation{
-  //Get current location
-  static Future getCurrentLocation() async{
-    try{
-      Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      return position;
-    }catch(e){
-      print(e);
-    }
-  }
-}
+
 
 
 
