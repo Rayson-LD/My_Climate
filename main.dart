@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:weather_app_2/fetchLocation.dart';
 import 'GetIcons.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -16,39 +17,11 @@ class _MainState extends State<Main> with SingleTickerProviderStateMixin {
   var humidity,speed,pressure,country,icon,temp,description,feels_like,temp_min,temp_max,city,image,location,id;
   var day = DateFormat.E().format(DateTime.now());
   var currentTime = DateFormat.jm().format(DateTime.now());
-  static const String _apiKey = 'Your API Key';
-  String searchApiUrl = 'https://www.metaweather.com/api/location/search/?query=';
-  String locationAppUrl = 'https://www.metaweather.com/api/location/';
-  int woeid;
-  void fetchSearch(String input) async{
-    var searchResult = await http.get(searchApiUrl+input);
-    var result = json.decode(searchResult.body)[0];
-    setState(() {
-      this.location = result["title"];
-      this.id = result["woeid"];
-    });
-  }
-  void fetchLocation() async{
-    var locationResult = await http.get(locationAppUrl+ woeid.toString());
-    var get = json.decode(locationResult.body);
-    var weather = get["consolidated_weather"];
-    var data  = weather[0];
-    setState(() {
-      this.country = data['title'];
-      this.temp = data['the_temp'].round();
-      this.description = data['weather_state_name'].replaceAll(' ','').toLowerCase();
-    });
-  }
-  void onSubmit(String input)
-  {
-    fetchSearch(input);
-    fetchLocation();
-  }
+  static const String _apiKey = 'ea429197b38be89cb9a58407faa003b0';
   Future getTemp() async {
     var lalo = await Getlocation.getCurrentLocation();
     if (lalo != null) {
-      http.Response response = await http.get(
-          'https://api.openweathermap.org/data/2.5/weather?lat=${lalo.latitude}&lon=${lalo.longitude}&appid=$_apiKey&units=metric');
+      var response = await http.get('https://api.openweathermap.org/data/2.5/weather?lat=${lalo.latitude}&lon=${lalo.longitude}&appid=$_apiKey&units=metric');
       var get = jsonDecode(response.body);
       setState(() {
         this.country = get['sys']['country'];
@@ -77,20 +50,28 @@ class _MainState extends State<Main> with SingleTickerProviderStateMixin {
     this.getTemp();
     tabs = new TabController(length: 3, vsync: this);
   }
-
+  void dialog()
+  {
+    showDialog(context: context, builder:(BuildContext context) =>  AlertDialog(
+      title: Text('Designed by :') ,
+      content: Text('Rayson Lawrence Dsouza'),
+      actions: [
+        // ignore: deprecated_member_use
+        FlatButton(onPressed: (){Navigator.pop(context);}, child: Text('Close',))
+      ],
+    ),
+    );
+  }
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home : new Scaffold(
           bottomNavigationBar: new Material(
-
               color: Colors.black,
               child: new TabBar(controller: tabs, tabs: <Widget>[
                 new Tab(
                   icon: new Icon(MdiIcons.information),
-
                 ),
-
                 new Tab(
                   icon: new Icon(WeatherIcons.thermometer_exterior),
                 ),
@@ -109,20 +90,45 @@ class _MainState extends State<Main> with SingleTickerProviderStateMixin {
         controller : tabs,
       children : [
       Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+
         children: <Widget>[
-          Container(
-            width: 300,
-            child: TextField(onSubmitted: (String input){onSubmit(input);},
-              style: TextStyle(color: Colors.white,fontSize: 25),
-            decoration: InputDecoration(hintText: 'Search another location ...',
-            hintStyle: TextStyle(color: Colors.white,fontSize: 18),
-                prefixIcon: Icon(Icons.search,color: Colors.white,)
-            ),
-            ),
+          Positioned(child:  new AppBar(
+      leading:IconButton(icon : new Icon(Icons.search,color: Colors.white,),onPressed: () => {
+            Navigator.of(context).push(new MaterialPageRoute(
+                builder: (BuildContext context) => new fetchLocation()))
+          },
+          ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+            actions: <Widget>[
+              PopupMenuButton(
+
+                itemBuilder: (context) {
+
+                  // ignore: deprecated_member_use
+                  var list = List<PopupMenuEntry<Object>>();
+                  list.add(
+                    PopupMenuDivider(
+                      height: 10,
+                    ),
+                  );
+                  list.add(
+                    CheckedPopupMenuItem(
+                      child: Text(
+                        "App Info",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      value: 2,
+                    ),
+                  );
+                  return list;
+                },
+              ),
+            ],
+      ),
           ),
           Container(
-            margin: EdgeInsets.only(top: 30),
+            margin: EdgeInsets.only(top: 200),
             child : new Text('$day, $currentTime',style: TextStyle(color: Colors.white,fontSize: 25),),
           ),
           Container(
@@ -177,7 +183,6 @@ class _MainState extends State<Main> with SingleTickerProviderStateMixin {
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
          child : Card(
             color: Colors.transparent,
-
             child: ListTile(
               leading: GetIcons.getIcon(icon),
               title: Text(
