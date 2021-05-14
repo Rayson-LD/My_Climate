@@ -15,32 +15,39 @@ class _MainState extends State<Main> with SingleTickerProviderStateMixin {
   TabController tabs;
   // ignore: non_constant_identifier_names
   var humidity,speed,pressure,country,icon,temp,description,feels_like,temp_min,temp_max,city,image,location,id;
+  String errorMessage='';
   var day = DateFormat.E().format(DateTime.now());
   var currentTime = DateFormat.jm().format(DateTime.now());
   static const String _apiKey = 'ea429197b38be89cb9a58407faa003b0';
   Future getTemp() async {
     var lalo = await Getlocation.getCurrentLocation();
+    try{
     if (lalo != null) {
-      var response = await http.get('https://api.openweathermap.org/data/2.5/weather?lat=${lalo.latitude}&lon=${lalo.longitude}&appid=$_apiKey&units=metric');
-      var get = jsonDecode(response.body);
-      setState(() {
-        this.country = get['sys']['country'];
-        this.description = get['weather'][0]['description'];
-        this.icon = get['weather'][0]['icon'];
-        this.temp = get['main']['temp'];
-        this.humidity = get['main']['humidity'];
-        this.pressure = get['main']['pressure'];
-        this.speed = get['wind']['speed'];
-        this.feels_like = get['main']['feels_like'];
-        this.temp_min = get['main']['temp_min'];
-        this.temp_max = get['main']['temp_max'];
-        this.city = get['name'];
-        this.image = get['weather'][0]['main'];
-      });
+        var response = await http.get(
+            'https://api.openweathermap.org/data/2.5/weather?lat=${lalo
+                .latitude}&lon=${lalo.longitude}&appid=$_apiKey&units=metric');
+        var get = jsonDecode(response.body);
+        setState(() {
+          this.country = get['sys']['country'];
+          this.description = get['weather'][0]['description'];
+          this.icon = get['weather'][0]['icon'];
+          this.temp = get['main']['temp'];
+          this.humidity = get['main']['humidity'];
+          this.pressure = get['main']['pressure'];
+          this.speed = get['wind']['speed'];
+          this.feels_like = get['main']['feels_like'];
+          this.temp_min = get['main']['temp_min'];
+          this.temp_max = get['main']['temp_max'];
+          this.city = get['name'];
+          this.image = get['weather'][0]['main'];
+        });
+      }
     }
-    else
+    catch(error)
       {
-        throw Exception('Failed to fetch the data');
+        setState(() {
+          errorMessage="Sorry, We are not able to connect. Please check your internet and make sure location is turned On!";
+        });
       }
   }
   @override
@@ -90,9 +97,8 @@ class _MainState extends State<Main> with SingleTickerProviderStateMixin {
         controller : tabs,
       children : [
       Column(
-
         children: <Widget>[
-          Positioned(child:  new AppBar(
+          new AppBar(
       leading:IconButton(icon : new Icon(Icons.search,color: Colors.white,),onPressed: () => {
             Navigator.of(context).push(new MaterialPageRoute(
                 builder: (BuildContext context) => new fetchLocation()))
@@ -101,32 +107,10 @@ class _MainState extends State<Main> with SingleTickerProviderStateMixin {
         backgroundColor: Colors.transparent,
         elevation: 0,
             actions: <Widget>[
-              PopupMenuButton(
-
-                itemBuilder: (context) {
-
-                  // ignore: deprecated_member_use
-                  var list = List<PopupMenuEntry<Object>>();
-                  list.add(
-                    PopupMenuDivider(
-                      height: 10,
-                    ),
-                  );
-                  list.add(
-                    CheckedPopupMenuItem(
-                      child: Text(
-                        "App Info",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      value: 2,
-                    ),
-                  );
-                  return list;
-                },
-              ),
+              IconButton(icon: Icon(Icons.info_outline_rounded), onPressed: dialog)
             ],
       ),
-          ),
+
           Container(
             margin: EdgeInsets.only(top: 200),
             child : new Text('$day, $currentTime',style: TextStyle(color: Colors.white,fontSize: 25),),
@@ -154,9 +138,18 @@ class _MainState extends State<Main> with SingleTickerProviderStateMixin {
             new Text('${country != null ? country.toString()+', ' : 'Retrieving.. '}',style: TextStyle(color: Colors.white,fontSize: 25),),
             new Text('${city != null ? city.toString()+' ' : ''}',style: TextStyle(color: Colors.white,fontSize: 25),),
             new Icon(MdiIcons.mapMarker,color: Colors.red,size: 27,),
+
          ],
           ),
           ),
+          Container(
+            margin: EdgeInsets.only(top: 20),
+            child:  Text(errorMessage,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold)),
+          )
           ],
       ),
             Column(
