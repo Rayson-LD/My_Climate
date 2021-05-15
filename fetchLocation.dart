@@ -21,7 +21,7 @@ class _fetchLocationState extends State<fetchLocation> {
     fetchlocation();
   }
   Future fetchSearch(String input) async{
-    var searchResult = await http.get('https://api.openweathermap.org/data/2.5/weather?q=$input&appid=ea429197b38be89cb9a58407faa003b0&units=metric');
+    var searchResult = await http.get('https://api.openweathermap.org/data/2.5/weather?q=$input&appid="//Add your api key"&units=metric');
     var result = json.decode(searchResult.body);
     setState(() {
       this.city = result["name"];
@@ -29,7 +29,7 @@ class _fetchLocationState extends State<fetchLocation> {
     });
   }
   Future fetchlocation() async{
-    var locationResult = await http.get('https://api.openweathermap.org/data/2.5/weather?id=$id&appid=ea429197b38be89cb9a58407faa003b0&units=metric');
+    var locationResult = await http.get('https://api.openweathermap.org/data/2.5/weather?id=$id&appid="//Add your api key"&units=metric');
     var get = json.decode(locationResult.body);
     setState(() {
       this.icon = get['weather'][0]['icon'];
