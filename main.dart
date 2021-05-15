@@ -18,7 +18,7 @@ class _MainState extends State<Main> with SingleTickerProviderStateMixin {
   String errorMessage='';
   var day = DateFormat.E().format(DateTime.now());
   var currentTime = DateFormat.jm().format(DateTime.now());
-  static const String _apiKey = 'ea429197b38be89cb9a58407faa003b0';
+  static const String _apiKey = '//Add your API key';
   Future getTemp() async {
     var lalo = await Getlocation.getCurrentLocation();
     try{
