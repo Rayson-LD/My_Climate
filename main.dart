@@ -14,7 +14,7 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main> with SingleTickerProviderStateMixin {
   TabController tabs;
   // ignore: non_constant_identifier_names
-  var humidity,speed,pressure,country,icon,temp,description,feels_like,temp_min,temp_max,city,image,location,id;
+  var humidity,speed,pressure,country,icon,temp,description,feels_like,temp_min,temp_max,city,image,location,id,dig;
   String errorMessage='';
   var day = DateFormat.E().format(DateTime.now());
   var currentTime = DateFormat.jm().format(DateTime.now());
