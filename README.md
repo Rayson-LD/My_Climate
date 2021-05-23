@@ -5,4 +5,5 @@ Completed
 1. Shows current location weather
 2. Check how the weather is on different locations
 3. Get daily updates on news from accuweather
-4.
+4. changes the bg as per the weather data
+#Screenshots available Soon!!
